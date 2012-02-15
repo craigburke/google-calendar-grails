@@ -1,0 +1,31 @@
+#calendar {
+    padding: 20px;
+}
+
+#calendar table {
+    margin-bottom: 0;
+}
+
+#calendar tr>td:first-child, tr>th:first-child {
+    padding-left: 0;
+}
+
+#calendar tr>td:last-child, tr>th:last-child {
+    padding-right: 0;
+}
+
+#calendar th:hover, tr:hover {
+    background: inherit;
+}
+
+#calendar tbody td:hover {
+    background: #E1F2B6;
+}
+
+#calendar table.fc-header {
+    border: none;
+}
+
+#calendar table.fc-header td:hover {
+    background: inherit;
+}
