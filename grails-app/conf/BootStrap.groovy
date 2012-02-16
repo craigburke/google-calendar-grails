@@ -19,7 +19,7 @@ class BootStrap {
             endTime = now.plusHours(1).toDate()
             location = "Regular location"
             recurType = EventRecurType.WEEKLY
-            [MONDAY, FRIDAY]*.toInteger().each { addToRecurDaysOfWeek(it) }
+            [MONDAY, WEDNESDAY, FRIDAY]*.toInteger().each { addToRecurDaysOfWeek(it) }
             addToExcludeDays(nextMonday.withTime(0, 0, 0, 0).toDate())
             isRecurring = true
             save(flush: true)
