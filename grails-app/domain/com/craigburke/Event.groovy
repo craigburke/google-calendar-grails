@@ -150,7 +150,7 @@ class Event {
         boolean occurrenceFound = false
 
         while (!occurrenceFound) {
-            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(nextOccurrence)) {
+            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(nextOccurrence.toDate())) {
                 occurrenceFound = true
             }
             else {
@@ -204,7 +204,7 @@ class Event {
     }
 
     private boolean isOnRecurringDay(Date date) {
-       int day = new DateTime(date).dayOfWeek()
+       int day = new DateTime(date).getDayOfWeek()
         
        recurDaysOfWeek.find{it == day}
     }
