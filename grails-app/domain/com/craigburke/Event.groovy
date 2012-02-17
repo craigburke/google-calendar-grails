@@ -178,7 +178,7 @@ class Event {
         nextOccurrence.toDate()
     }
 
-    private Calendar findNextYearlyOccurrence(Date afterDate) {
+    private Date findNextYearlyOccurrence(Date afterDate) {
         DateTime nextOccurrence = new DateTime(startTime)
 
         int yearsBeforeDate = Years.yearsBetween(new DateTime(startTime), new DateTime(afterDate)).getYears()
