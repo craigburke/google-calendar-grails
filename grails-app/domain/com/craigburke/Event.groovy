@@ -2,6 +2,7 @@ package com.craigburke
 
 import org.joda.time.*
 import static org.joda.time.DateTimeConstants.MONDAY
+import static org.joda.time.DateTimeConstants.SUNDAY
 
 class Event {
 
@@ -150,13 +151,13 @@ class Event {
         boolean occurrenceFound = false
 
         while (!occurrenceFound) {
-            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(nextOccurrence.toDate())) {
+            if (nextOccurrence.toDate() >= afterDate && isOnRecurringDay(nextOccurrence.toDate())) {
                 occurrenceFound = true
             }
             else {
-                if (nextOccurrence.dayOfWeek() == MONDAY) {
-                    // we've passed over into the next week
-                    nextOccurrence = nextOccurrence.plusWeeks(recurInterval)
+                if (nextOccurrence.dayOfWeek() == SUNDAY) {
+                    // we're about to pass into the next week
+                    nextOccurrence = nextOccurrence.plusDays(1).plusWeeks(recurInterval)
                 }
                 else {
                     nextOccurrence = nextOccurrence.plusDays(1)
