@@ -49,7 +49,8 @@ class Event {
 
             while (currentDate && currentDate < rangeEnd) {
                 dates.add(currentDate)
-                currentDate = findNextOccurrence(currentDate)
+                Date nextDay = new DateTime(currentDate).plusDays(1).toDate()
+                currentDate = findNextOccurrence(nextDay)
             }
         }
         // One time (non-recurring) event
@@ -77,8 +78,8 @@ class Event {
         else if (afterDate < startTime) {
             // First occurrence
             if (recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(startTime))) {
-               Date tomorrow = new DateTime(startTime).plusDays(1).withTime(0, 0, 0, 0).toDate()
-               nextOccurrence = findNextOccurrence(tomorrow)
+               Date nextDay = new DateTime(startTime).plusDays(1).toDate()
+               nextOccurrence = findNextOccurrence(nextDay)
             }
             else {
                 nextOccurrence = startTime
@@ -110,7 +111,7 @@ class Event {
 
             nextOccurrence = findNextOccurrence(nextDay.toDate())
         }
-        else if (recurUntil && recurUntil <= nextOccurrence?.getTime()) {
+        else if (recurUntil && recurUntil <= nextOccurrence) {
             // Next occurrence happens after recurUntil date
             nextOccurrence = null
         }
@@ -137,11 +138,10 @@ class Event {
 
         DateTime lastOccurrence = new DateTime(startTime)
         lastOccurrence = lastOccurrence.plusWeeks(weekOccurrencesBeforeDate * recurInterval)
-
         lastOccurrence = lastOccurrence.withDayOfWeek(MONDAY)
 
         if (isInSameWeek(lastOccurrence.toDate(), afterDate)) {
-            nextOccurrence = (new DateTime(afterDate)).plusDays(1)
+            nextOccurrence = lastOccurrence.plusDays(1)
         }
         else {
             nextOccurrence = lastOccurrence
@@ -154,7 +154,7 @@ class Event {
                 occurrenceFound = true
             }
             else {
-                if (nextOccurrence.dayOfWeek() == DateTimeConstants.MONDAY) {
+                if (nextOccurrence.dayOfWeek() == MONDAY) {
                     // we've passed over into the next week
                     nextOccurrence = nextOccurrence.plusWeeks(recurInterval)
                 }
