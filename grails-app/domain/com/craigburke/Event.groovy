@@ -76,9 +76,7 @@ class Event {
         }
         else if (afterDate < startTime) {
             // First occurrence
-            int day = new DateTime(startTime).getDayOfWeek()
-
-            if (recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(day))) {
+            if (recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(startTime))) {
                Date tomorrow = new DateTime(startTime).plusDays(1).withTime(0, 0, 0, 0).toDate()
                nextOccurrence = findNextOccurrence(tomorrow)
             }
@@ -152,9 +150,7 @@ class Event {
         boolean occurrenceFound = false
 
         while (!occurrenceFound) {
-            int day = nextOccurrence.getDayOfWeek()
-
-            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(day)) {
+            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(nextOccurrence)) {
                 occurrenceFound = true
             }
             else {
@@ -207,7 +203,9 @@ class Event {
         ((Days.daysBetween(dateTime1, dateTime2)).days == 0)
     }
 
-    private boolean isOnRecurringDay(Integer day) {
+    private boolean isOnRecurringDay(Date date) {
+       int day = new DateTime(date).dayOfWeek()
+        
        recurDaysOfWeek.find{it == day}
     }
 
