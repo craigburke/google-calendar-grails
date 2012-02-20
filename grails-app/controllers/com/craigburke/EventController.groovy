@@ -15,22 +15,27 @@ class EventController {
     }
    
     def list = {
-        Date startRange = new Instant(params.long('start') * 1000L).toDate()
-        Date endRange = new Instant(params.long('end') * 1000L).toDate()
+        def (startRange, endRange) = [params.long('start'), params.long('end')].collect { new Instant(it  * 1000L).toDate() }
 
-        String hql = """\
-            FROM Event WHERE
-            ((isRecurring = false AND (startTime between :startRange AND :endRange)) OR
-            (isRecurring = true AND (recurUntil is null OR recurUntil >= :startRange)))
-        """
-
-        def namedParameters = [startRange: startRange, endRange: endRange]
-        def events = Event.executeQuery(hql, namedParameters)
-
-        def eventList = []
+        def events = Event.withCriteria {
+            or {
+                and {
+                    eq("isRecurring", false)
+                    between("startTime", startRange, endRange)
+                }
+                and {
+                    eq("isRecurring", true)
+                    or {
+                        isNull("recurUntil")
+                        ge("recurUntil", startRange)
+                    }
+                }
+            }
+        }
         
         // iterate through to see if we need to add additional Event instances because of recurring
         // events
+        def eventList = []
         events.each {event ->
 
             def dates = event.findOccurrencesInRange(startRange, endRange)
@@ -48,7 +53,15 @@ class EventController {
             }
         }
 
-        render eventList as JSON
+        withFormat {
+            html {
+                [eventInstanceList: eventList]
+            }
+            json {
+                render eventList as JSON
+            }
+        }
+
     }
 
     def create = {
