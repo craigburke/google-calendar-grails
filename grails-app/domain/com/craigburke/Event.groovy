@@ -42,7 +42,7 @@ class Event {
     }
 
     public findOccurrencesInRange = {Date rangeStart, Date rangeEnd ->
-        def dates = new ArrayList()
+        def dates = []
 
         Date currentDate
         if (isRecurring) {
@@ -71,12 +71,10 @@ class Event {
         if (!isRecurring) {
             // non-repeating event
             nextOccurrence = null
-        }
-        else if (recurUntil && afterDate > recurUntil) {
+        } else if (recurUntil && afterDate > recurUntil) {
             // Event is already over
             nextOccurrence = null
-        }
-        else if (afterDate < startTime) {
+        } else if (afterDate < startTime) {
             // First occurrence
             if (recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(startTime))) {
                Date nextDay = new DateTime(startTime).plusDays(1).toDate()
@@ -85,8 +83,7 @@ class Event {
             else {
                 nextOccurrence = startTime
             }
-        }
-        else {
+        } else {
             switch (recurType) {
 
                 case EventRecurType.DAILY:
