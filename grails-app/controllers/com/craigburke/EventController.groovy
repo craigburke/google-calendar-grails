@@ -10,6 +10,8 @@ class EventController {
 
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
+    def eventService
+
     def index = {
 
     }
@@ -38,7 +40,8 @@ class EventController {
         def eventList = []
         events.each {event ->
 
-            def dates = event.findOccurrencesInRange(startRange, endRange)
+            def dates = eventService.findOccurrencesInRange(event, startRange, endRange)
+
             dates.each { date ->
                 DateTime startTime = new DateTime(date)
                 DateTime endTime = startTime.plusMinutes(event.durationMinutes)
