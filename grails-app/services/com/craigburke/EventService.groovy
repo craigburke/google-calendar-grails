@@ -10,21 +10,17 @@ import org.joda.time.Years
 
 class EventService {
 
-    private Event event
-
     def findOccurrencesInRange = {Event event, Date rangeStart, Date rangeEnd ->
-        this.event = event
-
         def dates = []
 
         Date currentDate
         if (event.isRecurring) {
-            currentDate = findNextOccurrence(rangeStart)
+            currentDate = findNextOccurrence(event, rangeStart)
 
             while (currentDate && currentDate < rangeEnd) {
                 dates.add(currentDate)
                 Date nextDay = new DateTime(currentDate).plusDays(1).toDate()
-                currentDate = findNextOccurrence(nextDay)
+                currentDate = findNextOccurrence(event, nextDay)
             }
         }
         // One time (non-recurring) event
@@ -38,7 +34,7 @@ class EventService {
     }
 
     // For repeating event get next occurrence after the specified date
-    private Date findNextOccurrence(Date afterDate) {
+    private Date findNextOccurrence(Event event, Date afterDate) {
         Date nextOccurrence
 
         if (!event.isRecurring) {
@@ -49,9 +45,9 @@ class EventService {
             nextOccurrence = null
         } else if (afterDate < event.startTime) {
             // First occurrence
-            if (event.recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(event.startTime))) {
+            if (event.recurType == EventRecurType.WEEKLY && !(isOnRecurringDay(event, event.startTime))) {
                 Date nextDay = new DateTime(event.startTime).plusDays(1).toDate()
-                nextOccurrence = findNextOccurrence(nextDay)
+                nextOccurrence = findNextOccurrence(event, nextDay)
             }
             else {
                 nextOccurrence = event.startTime
@@ -60,27 +56,27 @@ class EventService {
             switch (event.recurType) {
 
                 case EventRecurType.DAILY:
-                    nextOccurrence = findNextDailyOccurrence(afterDate)
+                    nextOccurrence = findNextDailyOccurrence(event, afterDate)
                     break
                 case EventRecurType.WEEKLY:
-                    nextOccurrence = findNextWeeklyOccurrence(afterDate)
+                    nextOccurrence = findNextWeeklyOccurrence(event, afterDate)
                     break
                 case EventRecurType.MONTHLY:
-                    nextOccurrence = findNextMonthlyOccurrence(afterDate)
+                    nextOccurrence = findNextMonthlyOccurrence(event, afterDate)
                     break
                 case EventRecurType.YEARLY:
-                    nextOccurrence = findNextYearlyOccurrence(afterDate)
+                    nextOccurrence = findNextYearlyOccurrence(event, afterDate)
                     break
             }
 
 
         }
 
-        if (isOnExcludedDay(nextOccurrence)) {
+        if (isOnExcludedDay(event, nextOccurrence)) {
             // Skip this occurrence and go to the next one
             DateTime nextDay = (new DateTime(nextOccurrence)).plusDays(1)
 
-            nextOccurrence = findNextOccurrence(nextDay.toDate())
+            nextOccurrence = findNextOccurrence(event, nextDay.toDate())
         }
         else if (event.recurUntil && event.recurUntil <= nextOccurrence) {
             // Next occurrence happens after recurUntil date
@@ -90,7 +86,7 @@ class EventService {
         nextOccurrence
     }
 
-    private Date findNextDailyOccurrence(Date afterDate) {
+    private Date findNextDailyOccurrence(Event event, Date afterDate) {
         DateTime nextOccurrence = new DateTime(event.startTime)
 
         int daysBeforeDate = Days.daysBetween(new DateTime(event.startTime), new DateTime(afterDate)).getDays()
@@ -102,8 +98,7 @@ class EventService {
     }
 
 
-    private Date findNextWeeklyOccurrence(Date afterDate) {
-        DateTime nextOccurrence = new DateTime()
+    private Date findNextWeeklyOccurrence(Event event, Date afterDate) {
         int weeksBeforeDate = Weeks.weeksBetween(new DateTime(event.startTime), new DateTime(afterDate)).getWeeks()
         int weekOccurrencesBeforeDate = Math.floor(weeksBeforeDate / event.recurInterval)
 
@@ -111,6 +106,7 @@ class EventService {
         lastOccurrence = lastOccurrence.plusWeeks(weekOccurrencesBeforeDate * event.recurInterval)
         lastOccurrence = lastOccurrence.withDayOfWeek(MONDAY)
 
+        DateTime nextOccurrence
         if (isInSameWeek(lastOccurrence.toDate(), afterDate)) {
             nextOccurrence = lastOccurrence.plusDays(1)
         }
@@ -121,7 +117,7 @@ class EventService {
         boolean occurrenceFound = false
 
         while (!occurrenceFound) {
-            if (nextOccurrence.toDate() >= afterDate && isOnRecurringDay(nextOccurrence.toDate())) {
+            if (nextOccurrence.toDate() >= afterDate && isOnRecurringDay(event, nextOccurrence.toDate())) {
                 occurrenceFound = true
             }
             else {
@@ -139,7 +135,7 @@ class EventService {
         nextOccurrence.toDate()
     }
 
-    private Date findNextMonthlyOccurrence(Date afterDate) {
+    private Date findNextMonthlyOccurrence(Event event, Date afterDate) {
         DateTime nextOccurrence = new DateTime(event.startTime)
 
         int monthsBeforeDate = Months.monthsBetween(new DateTime(event.startTime), new DateTime(afterDate)).getMonths()
@@ -149,7 +145,7 @@ class EventService {
         nextOccurrence.toDate()
     }
 
-    private Date findNextYearlyOccurrence(Date afterDate) {
+    private Date findNextYearlyOccurrence(Event event, Date afterDate) {
         DateTime nextOccurrence = new DateTime(event.startTime)
 
         int yearsBeforeDate = Years.yearsBetween(new DateTime(event.startTime), new DateTime(afterDate)).getYears()
@@ -174,14 +170,13 @@ class EventService {
         ((Days.daysBetween(dateTime1, dateTime2)).days == 0)
     }
 
-    private boolean isOnRecurringDay(Date date) {
+    private boolean isOnRecurringDay(Event event, Date date) {
         int day = new DateTime(date).getDayOfWeek()
 
         event.recurDaysOfWeek.find{it == day}
     }
 
-    private def isOnExcludedDay = {Date date ->
-        boolean result = false
+    private def isOnExcludedDay = {Event event, Date date ->
         date = (new DateTime(date)).withTime(0, 0, 0, 0).toDate()
         event.excludeDays.contains(date)
     }
