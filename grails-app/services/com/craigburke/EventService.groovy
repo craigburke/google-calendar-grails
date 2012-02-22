@@ -173,7 +173,7 @@ class EventService {
     private boolean isOnRecurringDay(Event event, Date date) {
         int day = new DateTime(date).getDayOfWeek()
 
-        event.recurDaysOfWeek.find{it == day}
+        event.recurDaysOfWeek.find{it == day} != null
     }
 
     private def isOnExcludedDay = {Event event, Date date ->
