@@ -38,12 +38,15 @@ grails.resources.modules = {
         resource url:'/js/jquery-1.7.1.min.js', disposition: 'head'
     }
 
+    home {
+        resource url:'/css/home.css'
+    }
+
     fullCalendar {
         dependsOn 'core'
         resource url:'/js/fullcalendar.min.js'
         resource url:'/css/fullcalendar.css'
     }
-
 
     calendar {
         dependsOn 'fullCalendar'
