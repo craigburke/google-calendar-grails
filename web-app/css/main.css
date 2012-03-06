@@ -583,3 +583,36 @@ a.skip {
 	position: absolute;
 	left: -9999px;
 }
+
+/* ====== Styles overrides ====== */
+
+#ui-datepicker-div {
+    margin: auto;
+    font-size: .8em;
+}
+
+.ui-timepicker-div dd {
+    margin: 4px 0 4px 40px;
+}
+
+#ui-datepicker-div td:hover,
+#ui-datepicker-div tr:hover
+{
+    background: transparent;
+}
+
+.nav a.calendar {
+    background-image: url(../images/skin/date.png);
+    background-position: 0.7em center;
+    background-repeat: no-repeat;
+    text-indent: 25px;
+}
+
+.ui-widget {
+    font-size: .8em !important;
+}
+
+button {
+    display: block;
+    border: 1px solid #CCC;
+}

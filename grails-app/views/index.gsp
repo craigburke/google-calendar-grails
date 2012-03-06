@@ -6,6 +6,14 @@
         <r:require module="home" />
 	</head>
 	<body>
+    <div class="nav" role="navigation">
+        <ul>
+            <li><a href="${createLink(uri: '/')}" class="home">Home</a></li>
+            <li><g:link class="calendar" controller="event" action="index">Calendar</g:link></li>
+            <li><g:link class="create" controller="event" action="create">New event</g:link></li>
+        </ul>
+    </div>
+
 		<a href="#page-body" class="skip"><g:message code="default.link.skip.label" default="Skip to content&hellip;"/></a>
 		<div id="status" role="complementary">
 			<h1>Application Status</h1>

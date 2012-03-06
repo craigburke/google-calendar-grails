@@ -1,10 +1,14 @@
 <%@ page import="com.craigburke.Event" %>
+
 <!doctype html>
 <html>
 <head>
     <meta name="layout" content="main">
     <g:set var="entityName" value="${message(code: 'event.label', default: 'Event')}"/>
     <title><g:message code="default.edit.label" args="[entityName]"/></title>
+
+    <r:require module="calendar" />
+
 </head>
 
 <body>
@@ -13,10 +17,9 @@
 
 <div class="nav" role="navigation">
     <ul>
-        <li><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></li>
-        <li><g:link class="list" action="list"><g:message code="default.list.label" args="[entityName]"/></g:link></li>
-        <li><g:link class="create" action="create"><g:message code="default.new.label"
-                                                              args="[entityName]"/></g:link></li>
+        <li><a href="${createLink(uri: '/')}" class="home">Home</a></li>
+        <li><g:link action="index" class="calendar">Calendar</g:link></li>
+        <li><g:link action="create" class="create">New Event</g:link></li>
     </ul>
 </div>
 
@@ -36,17 +39,26 @@
     <g:form method="post">
         <g:hiddenField name="id" value="${eventInstance?.id}"/>
         <g:hiddenField name="version" value="${eventInstance?.version}"/>
+        <g:hiddenField name="editType" value="" />
+
         <fieldset class="form">
             <g:render template="form"/>
         </fieldset>
         <fieldset class="buttons">
-            <g:actionSubmit class="save" action="update"
+
+            <g:actionSubmit class="save ${eventInstance.isRecurring ? 'recurring' : ''}" action="update"
                             value="${message(code: 'default.button.update.label', default: 'Update')}"/>
-            <g:actionSubmit class="delete" action="delete"
-                            value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate=""
-                            onclick="return confirm('${message(code: 'default.button.delete.confirm.message', default: 'Are you sure?')}');"/>
+            <g:actionSubmit class="delete ${eventInstance.isRecurring ? 'recurring' : ''}" action="delete"
+                            value="${message(code: 'default.button.delete.label', default: 'Delete')}" formnovalidate="" />
         </fieldset>
     </g:form>
+
+    <g:if test="${eventInstance.isRecurring}">
+        <g:render template="deletePopup" model="model" />
+        <g:render template="editPopup" model="model" />
+    </g:if>
+
 </div>
+
 </body>
 </html>

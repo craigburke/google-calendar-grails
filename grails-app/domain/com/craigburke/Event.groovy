@@ -24,6 +24,7 @@ class Event {
     static hasMany = [recurDaysOfWeek: Integer, excludeDays: Date]
     static transients = ['durationMinutes']
 
+
     static constraints = {
         title(nullable: false, blank: false)
         location(nullable: true, blank:  true)
@@ -34,6 +35,7 @@ class Event {
         recurCount(nullable: true)
         startTime(nullable: false)
         excludeDays(nullable: true)
+        sourceEvent(nullable: true)
     }
 
     public int getDurationMinutes() {
@@ -56,6 +58,12 @@ class Event {
         excludeDays?.clear()
         recurDaysOfWeek?.clear()
     }
+
+    def beforeDelete() {
+        Event.executeUpdate("UPDATE Event E SET E.sourceEvent = null WHERE E.sourceEvent.id = :eventId", [eventId: this.id])
+    }
+    
+
 }
 
 

@@ -29,3 +29,39 @@
 #calendar table.fc-header td:hover {
     background: inherit;
 }
+
+.ui-tooltip-content {
+    width: 400px;
+}
+
+.eventPopup {
+    padding: 4px;
+}
+
+.eventPopup h2 {
+    color: #48802C;
+    font-size: 1.2em;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.eventPopup .date {
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .2);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+#calendar .active .fc-event-inner {
+    background: #0005ae;
+}
+
+#recurOptions div {
+    padding: 8px 0;
+    font-weight: bold;
+}
+
+#recurOptions #weeklyOptions .options label {
+    padding: 0 2px;
+    font-weight: normal;
+}
