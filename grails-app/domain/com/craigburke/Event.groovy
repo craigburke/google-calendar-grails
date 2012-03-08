@@ -4,7 +4,7 @@ import org.joda.time.DateTime
 import org.joda.time.Minutes
 
 class Event {
-
+    
     String title
     String location
     String description
@@ -24,6 +24,7 @@ class Event {
     static hasMany = [recurDaysOfWeek: Integer, excludeDays: Date]
     static transients = ['durationMinutes']
 
+    def eventService
 
     static constraints = {
         title(nullable: false, blank: false)
@@ -36,29 +37,45 @@ class Event {
         startTime(nullable: false)
         excludeDays(nullable: true)
         sourceEvent(nullable: true)
+        startTime(required: true, nullable: false)
+        endTime(required: true, nullable: false, validator: {val, obj -> val > obj.startTime} )
     }
 
     public int getDurationMinutes() {
         Minutes.minutesBetween(new DateTime(startTime), new DateTime(endTime)).minutes
     }
 
-    void setIsRecurring(boolean value) {
-        isRecurring = value
-
+    private void updateRecurringValues() {
         if (!isRecurring) {
-            clearAllRecurringValues()
+            recurType = null
+            recurCount = null
+            recurInterval = null
+            recurUntil = null
+            excludeDays?.clear()
+            recurDaysOfWeek?.clear()
         }
+
+        // Set recurUntil date based on the recurCount value
+        if (recurCount && !recurUntil) {
+           Date recurCountDate = startTime
+
+           for (int i in 1..recurCount) {
+               recurCountDate = eventService.findNextOccurrence(this, recurCountDate)
+           }
+
+           recurUntil = recurCountDate
+        }
+        
     }
 
-    private void clearAllRecurringValues() {
-        recurType = null
-        recurCount = null
-        recurInterval = null
-        recurUntil = null
-        excludeDays?.clear()
-        recurDaysOfWeek?.clear()
+    def beforeUpdate() {
+        updateRecurringValues()
     }
-
+    
+    def beforeInsert() {
+        updateRecurringValues()
+    }
+    
     def beforeDelete() {
         Event.executeUpdate("UPDATE Event E SET E.sourceEvent = null WHERE E.sourceEvent.id = :eventId", [eventId: this.id])
     }

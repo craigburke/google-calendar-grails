@@ -4,8 +4,6 @@ import org.joda.time.DateTime
 import org.joda.time.Instant
 
 import grails.converters.JSON
-import java.text.SimpleDateFormat
-import org.joda.time.Minutes
 
 class EventController {
     def eventService
@@ -73,7 +71,7 @@ class EventController {
 
 
     def show = {
-        def (startTime, endTime) = [params.long('startTime'), params.long('endTime')]
+        def (occurrenceStart, occurrenceEnd) = [params.long('occurrenceStart'), params.long('occurrenceEnd')]
         def eventInstance = Event.get(params.id)
 
         if (!eventInstance) {
@@ -81,7 +79,7 @@ class EventController {
             redirect(action: "index")
         }
         else {
-            def model = [eventInstance: eventInstance, startTime: startTime, endTime: endTime]
+            def model = [eventInstance: eventInstance, occurrenceStart: occurrenceStart, occurrenceEnd: occurrenceEnd]
 
             if (request.xhr) {
                 render(template: "showPopup", model: model)
@@ -108,14 +106,14 @@ class EventController {
 
     def edit = {
         def eventInstance = Event.get(params.id)
-        def (startTime, endTime) = [params.long('startTime'), params.long('endTime')]
+        def (occurrenceStart, occurrenceEnd) = [params.long('occurrenceStart'), params.long('occurrenceEnd')]
 
         if (!eventInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'event.label', default: 'Event'), params.id])}"
             redirect(action: "index")
         }
         else {
-            [eventInstance: eventInstance, startTime: startTime, endTime: endTime]
+            [eventInstance: eventInstance, occurrenceStart: occurrenceStart, occurrenceEnd: occurrenceEnd]
         }
 
     }
@@ -124,96 +122,40 @@ class EventController {
         def eventInstance = Event.get(params.id)
         String editType = params.editType
 
-        if (eventInstance && !eventInstance.isRecurring) {
-            eventInstance.properties = params
-            if (!eventInstance.hasErrors() && eventInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'event.label', default: 'Event'), eventInstance.id])}"
-                redirect(action: "index")
-            }
-            else {
-                render(view: "edit", model: [eventInstance: eventInstance, startTime: startTime, endTime: endTime])
-            }
-        }
-        else if (eventInstance && editType) {
-            Date startTime = params.date('startTime', ['MM/dd/yyyy hh:mm a'])
-            Date endTime = params.date('endTime', ['MM/dd/yyyy hh:mm a'])
+        def result = eventService.updateEvent(eventInstance, editType, params)
 
-            // Using the date from the original startTime and endTime with the update time from the form
-            Date updatedStartTime = new DateTime(eventInstance.startTime).withTime(startTime.hours, startTime.minutes, 0, 0).toDate()
-            Date updatedEndTime = new DateTime(updatedStartTime).plusMinutes(Minutes.between(new DateTime(startTime), new DateTime(endTime)).minutes)
-
-            if (editType == "occurrence") {
-                // Add an exclusion
-                eventInstance.with {
-                    addToExcludeDays(new DateTime(startTime).withTime(0, 0, 0, 0).toDate())
-                    save(flush: true)
-                }
-
-                // single event
-                new Event(params).with {
-                    startTime = updatedStartTime
-                    endTime = updatedEndTime
-                    isRecurring = false // ignore recurring options this is a single event
-                    save(flush: true)
-                }
-            }
-            else if (editType == "following") {
-                // following event
-                new Event(params).with {
-                    recurUntil = eventInstance.recurUntil
-                    save(flush: true)
-                }
-
-                eventInstance.with {
-                    recurUntil = startTime
-                    save(flush: true)
-                }
-            }
-            else if (editType == "all") {
-                eventInstance.properties = params
-                eventInstance.save(flush: true)
-            }
-            
+        if (!result.error) {
+            flash.message = "${message(code: 'default.updated.message', args: [message(code: 'event.label', default: 'Event'), eventInstance.id])}"
             redirect(action: "index")
         }
-        else {
+        if (result.error == 'not.found') {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'event.label', default: 'Event'), params.id])}"
             redirect(action: "index")
         }
+        else if (result.error == 'has.errors') {
+            render(view: "edit", model: [eventInstance: eventInstance])
+        }
+
     }
 
 
     def delete = {
         def eventInstance = Event.get(params.id)
         String deleteType = params.deleteType
+        Date occurrenceStart = new Instant(params.long('occurrenceStart')).toDate()
 
-        if (eventInstance && (!eventInstance.isRecurring || deleteType == "all")) {
-            eventInstance.delete(flush: true)
-            flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'event.label', default: 'Event'), params.id])}"
+        def result = eventService.deleteEvent(eventInstance, occurrenceStart, deleteType)
+
+        if (!result.error) {
             redirect(action: "index")
         }
-        else if (eventInstance && deleteType) {
-            def startTime = new Instant(params.long('startTime')).toDate()
-
-            if (deleteType == "occurrence") {
-                // Add an exclusion
-                eventInstance.addToExcludeDays(new DateTime(startTime).withTime(0, 0, 0, 0).toDate())
-                eventInstance.save(flush: true);
-            }
-            else if (deleteType == "following") {
-                eventInstance.recurUntil = startTime
-                eventInstance.save(flush: true)
-            }
-
-            redirect(action: "index")
-        }
-        else {
+        if (result.error == 'not.found') {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'event.label', default: 'Event'), params.id])}"
             redirect(action: "index")
         }
-
-
-
+        else if (result.error == 'has.errors') {
+            redirect(action: "index")
+        }
     }
 
     

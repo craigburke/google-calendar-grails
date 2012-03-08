@@ -2,7 +2,7 @@
 
 <g:form action="delete">
     <g:hiddenField name="id" value="${eventInstance.id}" />
-    <g:hiddenField name="startTime" value="${startTime}" />
+    <g:hiddenField name="occurrenceStart" value="${occurrenceStart}" />
 
     <p>Would you like to delete only this event, or all events in the series?</p>
 

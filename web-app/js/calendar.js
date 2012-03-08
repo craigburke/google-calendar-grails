@@ -16,10 +16,10 @@ function renderCalendar() {
         eventRender: function(event, element) {
             $(element).addClass(event.cssClass);
 
-            var startTime = event.start.getTime();
-            var endTime = event.end.getTime();
+            var occurrenceStart = event.start.getTime();
+            var occurrenceEnd = event.end.getTime();
 
-            var data = {id: event.id, startTime: startTime, endTime: endTime};
+            var data = {id: event.id, occurrenceStart: occurrenceStart, occurrenceEnd: occurrenceEnd};
 
             $(element).qtip({
                 content: {

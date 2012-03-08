@@ -36,8 +36,8 @@
             <span id="when-label" class="property-label">When</span>
 
             <span class="property-value" aria-labelledby="when-label">
-                <g:formatDate date="${new Instant(startTime).toDate()}" format="E, MMM d, hh:mma"/>  –
-                <g:formatDate date="${new Instant(endTime).toDate()}" format="E, MMM d, hh:mma"/>
+                <g:formatDate date="${new Instant(occurrenceStart).toDate()}" format="E, MMM d, hh:mma"/>  –
+                <g:formatDate date="${new Instant(occurrenceEnd).toDate()}" format="E, MMM d, hh:mma"/>
             </span>
 
         </li>
@@ -71,8 +71,8 @@
         <fieldset class="buttons">
             <g:hiddenField name="id" value="${eventInstance?.id}"/>
 
-            <g:hiddenField name="startTime" value="${startTime}" />
-            <g:hiddenField name="endTime" value="${endTime}" />
+            <g:hiddenField name="occurrenceStart" value="${occurrenceStart}" />
+            <g:hiddenField name="occurrenceEnd" value="${occurrenceEnd}" />
 
             <g:actionSubmit class="edit" action="edit"
                             value="${message(code: 'default.button.edit.label', default: 'Edit')}"/>

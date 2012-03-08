@@ -10,7 +10,7 @@
         <ul>
             <li><a href="${createLink(uri: '/')}" class="home">Home</a></li>
             <li><g:link class="calendar" controller="event" action="index">Calendar</g:link></li>
-            <li><g:link class="create" controller="event" action="create">New event</g:link></li>
+            <li><g:link class="create" controller="event" action="create">New Event</g:link></li>
         </ul>
     </div>
 

@@ -13,7 +13,7 @@
 <div class="fieldcontain ${hasErrors(bean: eventInstance, field: 'startTime', 'error')}">
     <label for="startTime"><g:message code="event.startTime.label" default="Start Time" /></label>
     <g:textField name="startTime"
-         value="${formatDate(date: startTime ? new Instant(startTime).toDate() : eventInstance?.startTime, format: 'MM/dd/yyyy hh:mm a')}"
+         value="${formatDate(date: occurrenceStart ? new Instant(occurrenceStart).toDate() : eventInstance?.startTime, format: 'MM/dd/yyyy hh:mm a')}"
          class="datetime" />
 </div>
 
@@ -22,7 +22,7 @@
     <label for="endTime"><g:message code="event.endTime.label" default="End Time" /></label>
 
     <g:textField name="endTime"
-         value="${formatDate(date: endTime ? new Instant(endTime).toDate() : eventInstance?.endTime, format: 'MM/dd/yyyy hh:mm a')}"
+         value="${formatDate(date: occurrenceEnd ? new Instant(occurrenceEnd).toDate() : eventInstance?.endTime, format: 'MM/dd/yyyy hh:mm a')}"
          class="datetime" />
 
         
