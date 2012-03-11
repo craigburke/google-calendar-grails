@@ -60,7 +60,7 @@
 
     <div>
         <label>Repeat every:</label>
-        <g:select name="recurInterval" from="${1..30}" />
+        <g:select name="recurInterval" from="${1..30}" value="${eventInstance?.recurInterval}" />
         <span id="repeatLabel"></span>
     </div>
 
@@ -79,8 +79,8 @@
             <input id="recurEndOption2" name="recurEndOption" type="radio" group="recurEndOption" ${(eventInstance.recurCount) ? 'checked="checked"' : ''} value="occurrences" />
             <label for="recurEndOption2">After <g:textField name="recurCount" size="3" value="${eventInstance?.recurCount}" /> occurances</label><br/>
 
-            <input id="recurEndOption3" name="recurEndOption" type="radio" group="recurEndOption" ${(eventInstance.recurUntil) ? 'checked="checked"' : ''} value="endDate" />
-            <label for="recurEndOption3">On <g:textField name="recurUntil" size="8" value="${formatDate(date: eventInstance?.recurUntil, format: 'MM/dd/yyyy')}" /></label>
+            <input id="recurEndOption3" name="recurEndOption" type="radio" group="recurEndOption" ${(!eventInstance.recurCount && eventInstance.recurUntil) ? 'checked="checked"' : ''} value="endDate" />
+            <label for="recurEndOption3">On <g:textField name="recurUntil" size="8" value="${formatDate(date: (eventInstance?.recurCount ? null : eventInstance?.recurUntil), format: 'MM/dd/yyyy')}" /></label>
 
 
         </div>

@@ -60,10 +60,10 @@ class Event {
            Date recurCountDate = startTime
 
            for (int i in 1..recurCount) {
-               recurCountDate = eventService.findNextOccurrence(this, recurCountDate)
+               recurCountDate = eventService.findNextOccurrence(this, new DateTime(recurCountDate).plusMinutes(1).toDate())
            }
 
-           recurUntil = recurCountDate
+           recurUntil = new DateTime(recurCountDate).plusMinutes(durationMinutes).toDate()
         }
         
     }
@@ -77,7 +77,17 @@ class Event {
     }
     
     def beforeDelete() {
-        Event.executeUpdate("UPDATE Event E SET E.sourceEvent = null WHERE E.sourceEvent.id = :eventId", [eventId: this.id])
+        def associatedEvents = Event.withCriteria {
+            eq('sourceEvent.id', this.id)
+        }
+
+        associatedEvents.each{def event ->
+            event.with {
+                sourceEvent = null
+                save(flush: true)
+            }
+        }
+        
     }
     
 

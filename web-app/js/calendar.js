@@ -142,6 +142,10 @@ function setupRecurOptions() {
 
 
     $("input[name='recurEndOption']").click(function() {
+        if ($(this).val() == "never") {
+            $("#recurUntil").val('');
+            $("#recurCount").val('');
+        }
         if ($(this).val() == "occurrences") {
             $("#recurUntil").val('');
         }
@@ -182,7 +186,7 @@ function showRecurPopup() {
           $("#recurOptions").show().appendTo("#recurPopup");
         },
         close: function(event, ui) {
-          $("#recurOptions").hide().appendTo("form");
+          $("#recurOptions").hide().appendTo("form.main");
         },
         buttons: {
             Ok: function() {
@@ -207,21 +211,7 @@ function getRecurDescription() {
             description += recurType;
         }
         else {
-            description += "Every " + recurInterval + " ";
-            switch(recurType)
-            {
-                case "Daily":
-                    description += "days";
-                    break;
-                case "Weekly":
-                    description += "weeks";
-                    break;
-                case "Monthly":
-                    description += "months";
-                    break;
-                case "Yearly":
-                    description += "years";
-            }
+            description += "Every " + recurInterval + " " + getRecurTypeUnit(recurType);
         }
 
         if (recurType == "Weekly") {
@@ -249,9 +239,34 @@ function getRecurDescription() {
     return description;
 }
 
+function getRecurTypeUnit(recurType) {
+    var result = "";
+
+    switch(recurType)
+    {
+        case "Daily":
+            result = "days";
+            break;
+        case "Weekly":
+            result = "weeks";
+            break;
+        case "Monthly":
+            result = "months";
+            break;
+        case "Yearly":
+            result = "years";
+    }
+    return result;
+}
+
 
 function updateRecurDescriptions() {
+    var recurType = $("#recurType option:selected").text();
+
     var description = getRecurDescription();
     $("#recurDescription").html(description);
     $("#recurSummary").html(description);
+
+    var repeatType = getRecurTypeUnit(recurType);
+    $("#repeatLabel").html(repeatType);
 }

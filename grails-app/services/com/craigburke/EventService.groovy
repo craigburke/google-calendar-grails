@@ -1,5 +1,7 @@
 package com.craigburke
 
+import org.springframework.transaction.annotation.Transactional
+
 import org.joda.time.DateTime
 import org.joda.time.Days
 import org.joda.time.Weeks
@@ -7,10 +9,113 @@ import static org.joda.time.DateTimeConstants.MONDAY
 import static org.joda.time.DateTimeConstants.SUNDAY
 import org.joda.time.Months
 import org.joda.time.Years
+import org.joda.time.Instant
+import org.joda.time.Minutes
+
 
 class EventService {
 
-    def findOccurrencesInRange = {Event event, Date rangeStart, Date rangeEnd ->
+    def updateEvent(Event eventInstance, String editType, def params) {
+        def result = [:]
+
+        try {
+            if (!eventInstance) {
+                result = [error: 'not.found']
+            }
+            else if (!eventInstance.isRecurring) {
+                eventInstance.properties = params
+
+                if (eventInstance.hasErrors() || !eventInstance.save(flush: true)) {
+                    result = [error: 'has.errors']
+                }
+            }
+            else {
+                Date startTime = params.date('startTime', ['MM/dd/yyyy hh:mm a'])
+                Date endTime = params.date('endTime', ['MM/dd/yyyy hh:mm a'])
+
+                // Using the date from the original startTime and endTime with the update time from the form
+                int updatedDuration = Minutes.minutesBetween(new DateTime(startTime), new DateTime(endTime)).minutes
+
+                Date updatedStartTime = new DateTime(eventInstance.startTime).withTime(startTime.hours, startTime.minutes, 0, 0).toDate()
+                Date updatedEndTime = new DateTime(updatedStartTime).plusMinutes(updatedDuration).toDate()
+
+                if (editType == "occurrence") {
+                    // Add an exclusion
+                    eventInstance.with {
+                        addToExcludeDays(new DateTime(startTime).withTime(0, 0, 0, 0).toDate())
+                        save(flush: true)
+                    }
+
+                    // single event
+                    new Event(params).with {
+                        startTime = updatedStartTime
+                        endTime = updatedEndTime
+                        isRecurring = false // ignore recurring options this is a single event
+                        save(flush: true)
+                    }
+                }
+                else if (editType == "following") {
+                    // following event
+                    new Event(params).with {
+                        recurUntil = eventInstance.recurUntil
+                        save(flush: true)
+                    }
+
+                    eventInstance.with {
+                        recurUntil = startTime
+                        save(flush: true)
+                    }
+                }
+                else if (editType == "all") {
+                    eventInstance.properties = params
+                    eventInstance.startTime = updatedStartTime
+                    eventInstance.endTime = updatedEndTime
+
+                    if (eventInstance.hasErrors() || !eventInstance.save()) {
+                        result = [error: 'has.errors']
+                    }
+                }
+            }
+        }
+        catch (Exception ex) {
+            result = [error: 'has.errors']
+        }
+
+        result
+    }
+
+    def deleteEvent(Event eventInstance, Date occurrenceStart, String deleteType) {
+
+        def result = [:]
+
+        try {
+            if (!eventInstance) {
+                result = [error: 'not.found']
+            }
+            if (!eventInstance.isRecurring || deleteType == "all") {
+                eventInstance.delete(flush: true)
+            }
+            else if (eventInstance && deleteType) {
+                if (deleteType == "occurrence") {
+                    // Add an exclusion
+                    eventInstance.addToExcludeDays(new DateTime(occurrenceStart).withTime(0, 0, 0, 0).toDate())
+                    eventInstance.save(flush: true);
+                }
+                else if (deleteType == "following") {
+                    eventInstance.recurUntil = occurrenceStart
+                    eventInstance.save(flush: true)
+                }
+            }
+        }
+        catch (Exception ex) {
+            result = [error: 'has.errors']
+        }
+
+        result
+    }
+
+    @Transactional(readOnly = true)
+    public def findOccurrencesInRange(Event event, Date rangeStart, Date rangeEnd) {
         def dates = []
 
         Date currentDate
@@ -34,7 +139,7 @@ class EventService {
     }
 
     // For repeating event get next occurrence after the specified date
-    private Date findNextOccurrence(Event event, Date afterDate) {
+    Date findNextOccurrence(Event event, Date afterDate) {
         Date nextOccurrence
 
         if (!event.isRecurring) {
@@ -111,7 +216,7 @@ class EventService {
             nextOccurrence = lastOccurrence.plusDays(1)
         }
         else {
-            nextOccurrence = lastOccurrence
+            nextOccurrence = lastOccurrence.plusWeeks(event.recurInterval)
         }
 
         boolean occurrenceFound = false
@@ -123,7 +228,7 @@ class EventService {
             else {
                 if (nextOccurrence.dayOfWeek() == SUNDAY) {
                     // we're about to pass into the next week
-                    nextOccurrence = nextOccurrence.plusDays(1).plusWeeks(event.recurInterval)
+                    nextOccurrence = nextOccurrence.withDayOfWeek(MONDAY).plusWeeks(event.recurInterval)
                 }
                 else {
                     nextOccurrence = nextOccurrence.plusDays(1)
@@ -176,7 +281,7 @@ class EventService {
         event.recurDaysOfWeek.find{it == day}
     }
 
-    private def isOnExcludedDay = {Event event, Date date ->
+    private def isOnExcludedDay(Event event, Date date) {
         date = (new DateTime(date)).withTime(0, 0, 0, 0).toDate()
         event.excludeDays.contains(date)
     }

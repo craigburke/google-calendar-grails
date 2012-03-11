@@ -31,6 +31,7 @@ class EventController {
             }
         }
 
+
         // iterate through to see if we need to add additional Event instances because of recurring
         // events
         def eventList = []

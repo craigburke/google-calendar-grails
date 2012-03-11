@@ -36,7 +36,7 @@
             </g:eachError>
         </ul>
     </g:hasErrors>
-    <g:form method="post">
+    <g:form method="post" class="main">
         <g:hiddenField name="id" value="${eventInstance?.id}"/>
         <g:hiddenField name="version" value="${eventInstance?.version}"/>
         <g:hiddenField name="editType" value="" />
