@@ -47,7 +47,7 @@
                 <ul>
                     <li><a href="http://www.craigburke.com/blog/2012/02/09/creating-google-calendar-in-grails-part-1-the-model/">Part 1: The Model</a></li>
                     <li><a href="http://www.craigburke.com/blog/2012/02/16/creating-google-calendar-in-grails-part-2-displaying-the-calendar/">Part 2: Displaying the Calendar</a></li>
-                    <li>Part 3: Coming Soon</li>
+                    <li><a href="http://www.craigburke.com/blog/2012/02/18/creating-google-calendar-in-grails-part-3-creating-and-modifying-events/">Part 3: Creating and Modifying Events</a></li>
                 </ul>    
                 
             </p>
