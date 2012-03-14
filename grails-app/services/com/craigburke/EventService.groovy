@@ -124,7 +124,7 @@ class EventService {
 
             while (currentDate && currentDate < rangeEnd) {
                 dates.add(currentDate)
-                Date nextDay = new DateTime(currentDate).plusDays(1).toDate()
+                Date nextDay = new DateTime(currentDate).plusMinutes(1).toDate()
                 currentDate = findNextOccurrence(event, nextDay)
             }
         }
