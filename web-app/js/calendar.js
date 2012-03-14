@@ -58,7 +58,6 @@ function renderCalendar() {
 }
 
 function setupDatePickers() {
-    $("input.date").datepicker();
     $("input.datetime").datetimepicker({
         ampm: true,
         stepMinute: 15
@@ -163,7 +162,8 @@ function setupRecurOptions() {
         updateRecurDescriptions();
     });
 
-    $("#recurUntil").datepicker({
+    $("#recurUntil").datetimepicker({
+        ampm: true,
         onSelect: function(dateText, inst) {
             // Make sure correct option is checked
             var checkboxId = + $(this).parent("label").attr("for");

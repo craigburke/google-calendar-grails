@@ -124,8 +124,8 @@ class EventService {
 
             while (currentDate && currentDate < rangeEnd) {
                 dates.add(currentDate)
-                Date nextDay = new DateTime(currentDate).plusMinutes(1).toDate()
-                currentDate = findNextOccurrence(event, nextDay)
+                Date nextMinute = new DateTime(currentDate).plusMinutes(1).toDate()
+                currentDate = findNextOccurrence(event, nextMinute)
             }
         }
         // One time (non-recurring) event
@@ -139,6 +139,7 @@ class EventService {
     }
 
     // For repeating event get next occurrence after the specified date
+    @Transactional(readOnly = true)
     Date findNextOccurrence(Event event, Date afterDate) {
         Date nextOccurrence
 

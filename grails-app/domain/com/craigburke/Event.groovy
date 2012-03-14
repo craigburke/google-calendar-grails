@@ -59,7 +59,7 @@ class Event {
         if (recurCount && !recurUntil) {
            Date recurCountDate = startTime
 
-           for (int i in 1..recurCount) {
+           for (int i in 1..(recurCount - 1)) {
                recurCountDate = eventService.findNextOccurrence(this, new DateTime(recurCountDate).plusMinutes(1).toDate())
            }
 

@@ -77,10 +77,10 @@
             <label for="recurEndOption1">Never</label><br />
 
             <input id="recurEndOption2" name="recurEndOption" type="radio" group="recurEndOption" ${(eventInstance.recurCount) ? 'checked="checked"' : ''} value="occurrences" />
-            <label for="recurEndOption2">After <g:textField name="recurCount" size="3" value="${eventInstance?.recurCount}" /> occurances</label><br/>
+            <label for="recurEndOption2">After <g:textField name="recurCount" size="3" value="${eventInstance?.recurCount}" /> occurrences</label><br/>
 
             <input id="recurEndOption3" name="recurEndOption" type="radio" group="recurEndOption" ${(!eventInstance.recurCount && eventInstance.recurUntil) ? 'checked="checked"' : ''} value="endDate" />
-            <label for="recurEndOption3">On <g:textField name="recurUntil" size="8" value="${formatDate(date: (eventInstance?.recurCount ? null : eventInstance?.recurUntil), format: 'MM/dd/yyyy')}" /></label>
+            <label for="recurEndOption3">On <g:textField name="recurUntil" size="8" value="${formatDate(date: (eventInstance?.recurCount ? null : eventInstance?.recurUntil), format: 'MM/dd/yyyy hh:mm a')}" /></label>
 
 
         </div>
