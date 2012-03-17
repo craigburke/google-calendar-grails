@@ -35,7 +35,7 @@
     </ul>
 </g:hasErrors>
 
-<g:form action="save" method="post" >
+<g:form action="save" class="main" method="post" >
 
     <fieldset class="form">
         <g:render template="form" model="model" />

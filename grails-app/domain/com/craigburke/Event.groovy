@@ -39,6 +39,9 @@ class Event {
         sourceEvent(nullable: true)
         startTime(required: true, nullable: false)
         endTime(required: true, nullable: false, validator: {val, obj -> val > obj.startTime} )
+        recurDaysOfWeek(validator: {val, obj -> 
+            if (obj.recurType == EventRecurType.WEEKLY && !val) {return 'null'}
+        })
     }
 
     public int getDurationMinutes() {
