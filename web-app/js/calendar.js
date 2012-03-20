@@ -7,7 +7,10 @@ $(document).ready(function() {
 
 function renderCalendar() {
     $("#calendar").fullCalendar({
-        events: 'list.json',
+        events: {
+            url: 'list.json',
+            ignoreTimezone: false
+        },
         header: {
             left: 'prev,next today',
             center: 'title',
