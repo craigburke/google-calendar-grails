@@ -12,6 +12,8 @@ class BootStrap {
 
     def init = { servletContext ->
 
+        TimeZone.setDefault(TimeZone.getTimeZone('GMT'))
+
         if (GrailsUtil.environment == "development") {
             def now = new DateTime()
             def tomorrow = now.plusDays(1)

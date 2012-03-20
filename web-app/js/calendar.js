@@ -7,10 +7,7 @@ $(document).ready(function() {
 
 function renderCalendar() {
     $("#calendar").fullCalendar({
-        events: {
-            url: 'list.json',
-            ignoreTimezone: false
-        },
+        events: 'list.json',
         header: {
             left: 'prev,next today',
             center: 'title',
@@ -19,8 +16,8 @@ function renderCalendar() {
         eventRender: function(event, element) {
             $(element).addClass(event.cssClass);
 
-            var occurrenceStart = event.start.getTime();
-            var occurrenceEnd = event.end.getTime();
+            var occurrenceStart = event.occurrenceStart;
+            var occurrenceEnd = event.occurrenceEnd;
 
             var data = {id: event.id, occurrenceStart: occurrenceStart, occurrenceEnd: occurrenceEnd};
 

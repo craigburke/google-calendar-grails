@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.joda.time.Instant
 
 import grails.converters.JSON
+import java.text.SimpleDateFormat
 
 class EventController {
     def eventService
@@ -35,6 +36,9 @@ class EventController {
         // iterate through to see if we need to add additional Event instances because of recurring
         // events
         def eventList = []
+
+        def displayDateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
         events.each {event ->
 
             def dates = eventService.findOccurrencesInRange(event, startRange, endRange)
@@ -43,12 +47,19 @@ class EventController {
                 DateTime startTime = new DateTime(date)
                 DateTime endTime = startTime.plusMinutes(event.durationMinutes)
 
+                /*
+                    start/end and occurrenceStart/occurrenceEnd are separate because fullCalendar will use the client's local timezone (which may be different than the server's timezone)
+                    start/end are used to render the events on the calendar and the occurrenceStart/occurrenceEnd values are passed along to the show popup
+                */
+
                 eventList << [
                         id: event.id,
                         title: event.title,
                         allDay: false,
-                        start: startTime.toString(),
-                        end: endTime.toString()
+                        start: displayDateFormatter.format(startTime.toDate()),
+                        end: displayDateFormatter.format(endTime.toDate()),
+                        occurrenceStart: startTime.toInstant().millis,
+                        occurrenceEnd: endTime.toInstant().millis
                 ]
             }
         }
