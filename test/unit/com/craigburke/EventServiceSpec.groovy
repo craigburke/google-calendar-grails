@@ -50,8 +50,8 @@ class EventServiceSpec extends UnitSpec {
             mwfEvent | wednesdayNextWeek | fridayNextWeek
     }
 
-    @Unroll("next occurence of weekly event with exclusion after #afterDate")
-    def "test exclusion of next monday"() {
+    @Unroll("next occurence of weekly event after #afterDate with exclusion")
+    def "next occurrence of a weekly event with an exclusion of next monday"() {
         setup:
             mwfEvent.addToExcludeDays(mondayNextWeek.toDate())
 
@@ -64,8 +64,9 @@ class EventServiceSpec extends UnitSpec {
             mwfEvent | now                 | wednesdayNextWeek
             mwfEvent | mondayNextWeek      | wednesdayNextWeek
             mwfEvent | wednesdayNextWeek   | fridayNextWeek
-
     }
+
+
 
 
 
