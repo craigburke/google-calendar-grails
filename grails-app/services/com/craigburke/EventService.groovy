@@ -160,7 +160,6 @@ class EventService {
             }
         } else {
             switch (event.recurType) {
-
                 case EventRecurType.DAILY:
                     nextOccurrence = findNextDailyOccurrence(event, afterDate)
                     break
@@ -223,7 +222,7 @@ class EventService {
         boolean occurrenceFound = false
 
         while (!occurrenceFound) {
-            if (nextOccurrence.toDate() >= afterDate && isOnRecurringDay(event, nextOccurrence.toDate())) {
+            if (nextOccurrence.toDate() > afterDate && isOnRecurringDay(event, nextOccurrence.toDate())) {
                 occurrenceFound = true
             }
             else {
@@ -284,6 +283,6 @@ class EventService {
 
     private def isOnExcludedDay(Event event, Date date) {
         date = (new DateTime(date)).withTime(0, 0, 0, 0).toDate()
-        event.excludeDays.contains(date)
+        event.excludeDays?.contains(date)
     }
 }
