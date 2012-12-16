@@ -18,6 +18,8 @@ class EventServiceSpec extends UnitSpec {
     @Shared DateTime mondayAfterNext
 
     @Shared Event mwfEvent
+    @Shared Event biWeeklyEvent
+
 
     def setupSpec() {
         now = new DateTime()
@@ -36,6 +38,8 @@ class EventServiceSpec extends UnitSpec {
                 recurDaysOfWeek: [MONDAY, WEDNESDAY, FRIDAY]
         )
 
+        biWeeklyEvent = new Event(mwfEvent.properties)
+        biWeeklyEvent.recurInterval = 2
     }
 
     @Unroll("next occurance of weekly event after #afterDate")
@@ -49,6 +53,22 @@ class EventServiceSpec extends UnitSpec {
             mwfEvent | mondayNextWeek    | wednesdayNextWeek
             mwfEvent | wednesdayNextWeek | fridayNextWeek
     }
+
+    @Unroll("next occurence of bi-weekly event after #afterDate")
+    def "next occurrence of a bi-weekly event with an exclusion of next monday"() {
+        expect:
+        service.findNextOccurrence(event, afterDate.toDate()) == expectedResult.toDate()
+
+        where:
+        event         | afterDate           | expectedResult
+        biWeeklyEvent | now                 | mondayNextWeek
+        biWeeklyEvent | mondayNextWeek      | wednesdayNextWeek
+        biWeeklyEvent | wednesdayNextWeek   | fridayNextWeek
+        biWeeklyEvent | fridayNextWeek      | mondayNextWeek.plusWeeks(2)
+        biWeeklyEvent | wednesdayNextWeek   | fridayNextWeek.plusWeeks(2)
+
+    }
+
 
     @Unroll("next occurence of weekly event after #afterDate with exclusion")
     def "next occurrence of a weekly event with an exclusion of next monday"() {
