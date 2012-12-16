@@ -55,7 +55,7 @@ class EventServiceSpec extends UnitSpec {
     }
 
     @Unroll("next occurence of bi-weekly event after #afterDate")
-    def "next occurrence of a bi-weekly event with an exclusion of next monday"() {
+    def "next occurrence of a bi-weekly event"() {
         expect:
         service.findNextOccurrence(event, afterDate.toDate()) == expectedResult.toDate()
 
@@ -65,8 +65,7 @@ class EventServiceSpec extends UnitSpec {
         biWeeklyEvent | mondayNextWeek      | wednesdayNextWeek
         biWeeklyEvent | wednesdayNextWeek   | fridayNextWeek
         biWeeklyEvent | fridayNextWeek      | mondayNextWeek.plusWeeks(2)
-        biWeeklyEvent | wednesdayNextWeek   | fridayNextWeek.plusWeeks(2)
-
+        biWeeklyEvent | mondayAfterNext     | mondayNextWeek.plusWeeks(2)
     }
 
 

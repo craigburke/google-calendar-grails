@@ -226,7 +226,7 @@ class EventService {
                 occurrenceFound = true
             }
             else {
-                if (nextOccurrence.dayOfWeek() == SUNDAY) {
+                if (nextOccurrence.getDayOfWeek() == SUNDAY) {
                     // we're about to pass into the next week
                     nextOccurrence = nextOccurrence.withDayOfWeek(MONDAY).plusWeeks(event.recurInterval)
                 }
