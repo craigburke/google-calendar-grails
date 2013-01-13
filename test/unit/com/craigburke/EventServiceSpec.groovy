@@ -85,6 +85,23 @@ class EventServiceSpec extends UnitSpec {
             mwfEvent | wednesdayNextWeek   | fridayNextWeek
     }
 
+    def "deleting an instance of a daily recurring event"() {
+        def event = new Event(
+                title: 'Repeating MWF Event',
+                startTime: mondayNextWeek.toDate(),
+                endTime: mondayNextWeek.plusHours(1).toDate(),
+                location: "Regular location",
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        )
+
+        when:
+        event.addToExcludeDays(mondayNextWeek.toDate())
+
+        then:
+        service.findNextOccurrence(event, mondayNextWeek.minusDays(1).toDate()) == mondayNextWeek.plusDays(1).toDate()
+    }
+
 
 
 
