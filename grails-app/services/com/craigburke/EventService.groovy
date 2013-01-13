@@ -196,8 +196,9 @@ class EventService {
 
         int daysBeforeDate = Days.daysBetween(new DateTime(event.startTime), new DateTime(afterDate)).getDays()
         int occurrencesBeforeDate = Math.floor(daysBeforeDate / event.recurInterval)
+        int daysToAdd = Math.max(occurrencesBeforeDate * event.recurInterval, event.recurInterval)
 
-        nextOccurrence = nextOccurrence.plusDays((occurrencesBeforeDate + 1) * event.recurInterval)
+        nextOccurrence = nextOccurrence.plusDays(daysToAdd)
 
         nextOccurrence.toDate()
     }
