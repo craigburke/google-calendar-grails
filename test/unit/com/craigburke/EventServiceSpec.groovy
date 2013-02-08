@@ -121,6 +121,50 @@ class EventServiceSpec extends UnitSpec {
         service.findNextOccurrence(event, mondayNextWeek.minusDays(1).toDate()) == mondayNextWeek.plusDays(2).toDate()
     }
 
+    @Unroll("next occurence of daily event after #afterDate")
+    def "repeating daily event"() {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: now.withTime(0, 0, 0, 0).toDate(),
+                endTime: now.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 1,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        )
+
+        expect:
+        service.findNextOccurrence(event, afterDate.toDate()) == afterDate.plusDays(1).withTime(0,0,0,0).toDate()
+
+
+        where:
+        afterDate << [now, mondayNextWeek, wednesdayNextWeek]
+    }
+
+    @Unroll("next occurrence of event every other day after #afterDate")
+    def "repeating every other day event"() {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        )
+
+        expect:
+        service.findNextOccurrence(event, date) == expectedResult
+
+
+        where:
+        date                                | expectedResult
+        mondayNextWeek.toDate()             | mondayNextWeek.plusDays(2).toDate()
+        mondayNextWeek.plusDays(1).toDate() | mondayNextWeek.plusDays(2).toDate()
+        wednesdayNextWeek.toDate()          | wednesdayNextWeek.plusDays(2).toDate()
+
+    }
+
 
 
 

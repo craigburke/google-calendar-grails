@@ -179,9 +179,7 @@ class EventService {
 
         if (isOnExcludedDay(event, nextOccurrence)) {
             // Skip this occurrence and go to the next one
-            DateTime nextDay = (new DateTime(nextOccurrence)).plusDays(1)
-
-            nextOccurrence = findNextOccurrence(event, nextDay.toDate())
+            nextOccurrence = findNextOccurrence(event, nextOccurrence)
         }
         else if (event.recurUntil && event.recurUntil <= nextOccurrence) {
             // Next occurrence happens after recurUntil date
@@ -195,8 +193,10 @@ class EventService {
         DateTime nextOccurrence = new DateTime(event.startTime)
 
         int daysBeforeDate = Days.daysBetween(new DateTime(event.startTime), new DateTime(afterDate)).getDays()
+
         int occurrencesBeforeDate = Math.floor(daysBeforeDate / event.recurInterval)
-        int daysToAdd = Math.max(occurrencesBeforeDate * event.recurInterval, event.recurInterval)
+
+        int daysToAdd = (occurrencesBeforeDate + 1) * event.recurInterval
 
         nextOccurrence = nextOccurrence.plusDays(daysToAdd)
 
