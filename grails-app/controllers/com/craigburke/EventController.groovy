@@ -132,9 +132,12 @@ class EventController {
 
     def update = {
         def eventInstance = Event.get(params.id)
-        String editType = params.editType
+        EventRecurActionType editType = params.editType.toUpperCase() as EventRecurActionType
 
-        def result = eventService.updateEvent(eventInstance, editType, params)
+        Date occurrenceStartTime = params.date('startTime', ['MM/dd/yyyy hh:mm a'])
+        Date occurrenceEndTime = params.date('endTime', ['MM/dd/yyyy hh:mm a'])
+
+        def result = eventService.updateEvent(eventInstance, editType, occurrenceStartTime, occurrenceEndTime, params)
 
         if (!result.error) {
             flash.message = "${message(code: 'default.updated.message', args: [message(code: 'event.label', default: 'Event'), eventInstance.id])}"
@@ -153,10 +156,11 @@ class EventController {
 
     def delete = {
         def eventInstance = Event.get(params.id)
-        String deleteType = params.deleteType
+
+        EventRecurActionType deleteType = params.deleteType.toUpperCase() as EventRecurActionType
         Date occurrenceStart = new Instant(params.long('occurrenceStart')).toDate()
 
-        def result = eventService.deleteEvent(eventInstance, occurrenceStart, deleteType)
+        def result = eventService.deleteEvent(eventInstance, deleteType, occurrenceStart)
 
         if (!result.error) {
             redirect(action: "index")

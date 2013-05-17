@@ -241,7 +241,10 @@ class EventServiceSpec extends UnitSpec {
         result.error == null
         event.recurUntil == new DateTime(occurenceStartTime).withTime(0,0,0,0).toDate()
         followingEvent != null
-        followingEvent.isRecurring == false
+        followingEvent.isRecurring == true
+        followingEvent.startTime == occurenceStartTime
+        followingEvent.endTime == occurenceEndTime
+        followingEvent.recurUntil == null
 
         where:
         occurenceStartTime                                           | occurenceEndTime                                                         | params

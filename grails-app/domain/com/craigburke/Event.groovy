@@ -92,13 +92,5 @@ public enum EventRecurType {
 }
 
 public enum EventRecurActionType {
-    OCCURRENCE('occurrence'),
-    FOLLOWING('following'),
-    ALL('all')
-
-    String name
-
-    EventRecurActionType(String name) {
-        this.name = name
-    }
+    OCCURRENCE, FOLLOWING, ALL
 }

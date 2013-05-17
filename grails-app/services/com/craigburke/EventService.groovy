@@ -54,17 +54,19 @@ class EventService {
                         break
 
                     case EventRecurActionType.FOLLOWING:
-                        eventInstance.with {
-                            recurUntil = occurrenceStartDateTime.withTime(0,0,0,0).toDate()
-                            save(flush: true)
-                        }
 
                         // create a new event for the changes following this occurrence
                         new Event(params).with {
+                            isRecurring = true
                             startTime = occurrenceStartTime
                             endTime = occurrenceEndTime
                             recurUntil = eventInstance.recurUntil
                             save(flush: true, failOnError: true)
+                        }
+
+                        eventInstance.with {
+                            recurUntil = occurrenceStartDateTime.withTime(0,0,0,0).toDate()
+                            save(flush: true)
                         }
 
                         break

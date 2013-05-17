@@ -33,7 +33,6 @@ class BootStrap {
 
             // Non-repeating single event that replaces the one excluded next Monday
             def event2 = new Event(title:  'Repeating MWF Event (different location)').with {
-                sourceEvent = event
                 startTime = nextMonday.toDate()
                 endTime = nextMonday.plusHours(1).toDate()
                 location = "New one-time location"
