@@ -19,14 +19,14 @@ environments {
     }
     test {
         dataSource {
-            dbCreate = "update"
+            dbCreate = "create-drop"
             url = "jdbc:h2:mem:testDb;MVCC=TRUE"
         }
     }
     production {
         dataSource {
-            dbCreate = "update"
-            url = "jdbc:h2:prodDb;MVCC=TRUE"
+            driverClassName = "com.mysql.jdbc.Driver"
+            dbCreate = "create-drop"
             pooled = true
             properties {
                maxActive = -1

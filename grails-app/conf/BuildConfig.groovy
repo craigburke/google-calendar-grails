@@ -38,14 +38,12 @@ grails.project.dependency.resolution = {
         test "org.spockframework:spock-grails-support:0.7-groovy-2.0"
 
 
-        // runtime 'mysql:mysql-connector-java:5.1.16'
+        runtime "mysql:mysql-connector-java:5.1.18"
     }
 
     plugins {
         compile ":hibernate:$grailsVersion"
         compile ":resources:1.1.6"
-
-        compile ":cloud-foundry:1.2.3"
 
         test(":spock:0.7") {
             exclude "spock-grails-support"

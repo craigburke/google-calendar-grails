@@ -1,6 +1,8 @@
 Google Calendar in Grails
 =============
 
+Check out the [demo running on Appfog](http://google-calendar.aws.af.cm/).
+
 This is a Grails 2.2.0 project, that serves as a companion to the following blog series Creating Google Calendar in Grails:
 
 * [Part 1 - The Model](http://www.craigburke.com/blog/2012/02/09/creating-google-calendar-in-grails-part-1-the-model/)
