@@ -37,6 +37,9 @@
                 <a href="https://github.com/craigburke/google-calendar-grails">Google Calendar Grails on Github</a>
 
             </p>
-            </div>
-	</body>
+
+            <span class="version">v<g:meta name="app.version"/></span>
+        </div>
+
+    </body>
 </html>

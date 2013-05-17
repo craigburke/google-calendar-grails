@@ -75,3 +75,8 @@ p {
     padding: 8px;
     padding-left: 30px;
 }
+
+#page-body .version {
+    float: right;
+    font-size: .7em;
+}
