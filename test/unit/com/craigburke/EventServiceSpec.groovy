@@ -272,7 +272,6 @@ class EventServiceSpec extends UnitSpec {
         occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
     }
 
-    @IgnoreRest
     def "delete an individual instance of a repeating event"()  {
         def event = new Event(
                 title: 'Repeating Daily Event',
@@ -295,9 +294,6 @@ class EventServiceSpec extends UnitSpec {
         occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
     }
 
-
-
-    @IgnoreRest
     def "delete all following instances of a repeating event"()  {
         def event = new Event(
                 title: 'Repeating Daily Event',
@@ -310,11 +306,11 @@ class EventServiceSpec extends UnitSpec {
         ).save(flush: true)
 
         when:
-        def result = service.deleteEvent(event, EventRecurActionType.OCCURRENCE, occurenceStartTime)
+        def result = service.deleteEvent(event, EventRecurActionType.FOLLOWING, occurenceStartTime)
 
         then:
         result.error == null
-        event.recurUntil = new DateTime(occurenceStartTime).withTime(0, 0, 0, 0).toDate()
+        event.recurUntil == new DateTime(occurenceStartTime).withTime(0, 0, 0, 0).toDate()
 
         where:
         occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
