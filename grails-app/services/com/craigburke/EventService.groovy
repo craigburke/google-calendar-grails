@@ -15,7 +15,8 @@ import org.joda.time.Minutes
 
 class EventService {
 
-    def updateEvent(Event eventInstance, String editType, def params) {
+
+    def updateEvent(Event eventInstance, EventRecurActionType actionType, Date occurrenceStartTime, Date occurrenceEndTime, def params) {
         def result = [:]
 
         try {
@@ -30,52 +31,63 @@ class EventService {
                 }
             }
             else {
-                Date startTime = params.date('startTime', ['MM/dd/yyyy hh:mm a'])
-                Date endTime = params.date('endTime', ['MM/dd/yyyy hh:mm a'])
 
-                // Using the date from the original startTime and endTime with the update time from the form
-                int updatedDuration = Minutes.minutesBetween(new DateTime(startTime), new DateTime(endTime)).minutes
+                DateTime occurrenceStartDateTime = new DateTime(occurrenceStartTime)
+                DateTime occurrenceEndDateTime = new DateTime(occurrenceEndTime)
 
-                Date updatedStartTime = new DateTime(eventInstance.startTime).withTime(startTime.hours, startTime.minutes, 0, 0).toDate()
-                Date updatedEndTime = new DateTime(updatedStartTime).plusMinutes(updatedDuration).toDate()
+                switch (actionType) {
+                    case EventRecurActionType.OCCURRENCE:
+                        // Add an exclusion
+                        eventInstance.with {
+                            addToExcludeDays(occurrenceStartDateTime.withTime(0, 0, 0, 0).toDate())
+                            save(flush: true)
+                        }
 
-                if (editType == "occurrence") {
-                    // Add an exclusion
-                    eventInstance.with {
-                        addToExcludeDays(new DateTime(startTime).withTime(0, 0, 0, 0).toDate())
-                        save(flush: true)
-                    }
+                        // single event
+                        new Event(params).with {
+                            startTime = occurrenceStartTime
+                            endTime = occurrenceEndTime
+                            isRecurring = false // ignore recurring options this is a single event
+                            save(flush: true, failOnError: true)
+                        }
 
-                    // single event
-                    new Event(params).with {
-                        startTime = updatedStartTime
-                        endTime = updatedEndTime
-                        isRecurring = false // ignore recurring options this is a single event
-                        save(flush: true)
-                    }
-                }
-                else if (editType == "following") {
-                    // following event
-                    new Event(params).with {
-                        recurUntil = eventInstance.recurUntil
-                        save(flush: true)
-                    }
+                        break
 
-                    eventInstance.with {
-                        recurUntil = startTime
-                        save(flush: true)
-                    }
-                }
-                else if (editType == "all") {
-                    eventInstance.properties = params
-                    eventInstance.startTime = updatedStartTime
-                    eventInstance.endTime = updatedEndTime
+                    case EventRecurActionType.FOLLOWING:
+                        eventInstance.with {
+                            recurUntil = occurrenceStartDateTime.withTime(0,0,0,0).toDate()
+                            save(flush: true)
+                        }
 
-                    if (eventInstance.hasErrors() || !eventInstance.save()) {
-                        result = [error: 'has.errors']
-                    }
+                        // create a new event for the changes following this occurrence
+                        new Event(params).with {
+                            startTime = occurrenceStartTime
+                            endTime = occurrenceEndTime
+                            recurUntil = eventInstance.recurUntil
+                            save(flush: true, failOnError: true)
+                        }
+
+                        break
+
+                    case EventRecurActionType.ALL:
+                        // Using the date from the original startTime and endTime with the update time from the form
+                        int updatedDuration = Minutes.minutesBetween(occurrenceStartDateTime, occurrenceEndDateTime).minutes
+
+                        Date updatedStartTime = new DateTime(eventInstance.startTime).withTime(occurrenceStartDateTime.hourOfDay, occurrenceStartDateTime.minuteOfHour, 0, 0).toDate()
+                        Date updatedEndTime = new DateTime(updatedStartTime).plusMinutes(updatedDuration).toDate()
+
+                        eventInstance.properties = params
+                        eventInstance.startTime = updatedStartTime
+                        eventInstance.endTime = updatedEndTime
+
+                        if (eventInstance.hasErrors() || !eventInstance.save(flush: true)) {
+                            result = [error: 'has.errors']
+                        }
+
+
                 }
             }
+
         }
         catch (Exception ex) {
             result = [error: 'has.errors']
@@ -84,7 +96,7 @@ class EventService {
         result
     }
 
-    def deleteEvent(Event eventInstance, Date occurrenceStart, String deleteType) {
+    def deleteEvent(Event eventInstance, EventRecurActionType actionType, Date occurrenceStart) {
 
         def result = [:]
 
@@ -92,19 +104,24 @@ class EventService {
             if (!eventInstance) {
                 result = [error: 'not.found']
             }
-            if (!eventInstance.isRecurring || deleteType == "all") {
+            if (!eventInstance.isRecurring || actionType == EventRecurActionType.ALL) {
                 eventInstance.delete(flush: true)
             }
-            else if (eventInstance && deleteType) {
-                if (deleteType == "occurrence") {
-                    // Add an exclusion
-                    eventInstance.addToExcludeDays(new DateTime(occurrenceStart).withTime(0, 0, 0, 0).toDate())
-                    eventInstance.save(flush: true);
+            else {
+                switch (actionType) {
+                    case EventRecurActionType.OCCURRENCE:
+                        // Add an exclusion
+                        eventInstance.addToExcludeDays(new DateTime(occurrenceStart).withTime(0, 0, 0, 0).toDate())
+                        eventInstance.save(flush: true)
+                        break
+
+                    case EventRecurActionType.FOLLOWING:
+                        eventInstance.recurUntil = occurrenceStart
+                        eventInstance.save(flush: true)
+                        break
+
                 }
-                else if (deleteType == "following") {
-                    eventInstance.recurUntil = occurrenceStart
-                    eventInstance.save(flush: true)
-                }
+
             }
         }
         catch (Exception ex) {

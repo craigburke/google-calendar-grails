@@ -4,7 +4,9 @@ import org.joda.time.DateTime
 import org.joda.time.Minutes
 
 class Event {
-    
+
+    def eventService
+
     String title
     String location
     String description
@@ -19,12 +21,8 @@ class Event {
     Date recurUntil
     Integer recurCount
 
-    Event sourceEvent
-
     static hasMany = [recurDaysOfWeek: Integer, excludeDays: Date]
     static transients = ['durationMinutes']
-
-    def eventService
 
     static constraints = {
         title(nullable: false, blank: false)
@@ -36,7 +34,6 @@ class Event {
         recurCount(nullable: true)
         startTime(nullable: false)
         excludeDays(nullable: true)
-        sourceEvent(nullable: true)
         startTime(required: true, nullable: false)
         endTime(required: true, nullable: false, validator: {val, obj -> val > obj.startTime} )
         recurDaysOfWeek(validator: {val, obj -> 
@@ -78,24 +75,8 @@ class Event {
     def beforeInsert() {
         updateRecurringValues()
     }
-    
-    def beforeDelete() {
-        def associatedEvents = Event.withCriteria {
-            eq('sourceEvent.id', this.id)
-        }
-
-        associatedEvents.each{def event ->
-            event.with {
-                sourceEvent = null
-                save(flush: true)
-            }
-        }
-        
-    }
-    
 
 }
-
 
 public enum EventRecurType {
     DAILY('Daily'),
@@ -106,6 +87,18 @@ public enum EventRecurType {
     String name
 
     EventRecurType(String name) {
+        this.name = name
+    }
+}
+
+public enum EventRecurActionType {
+    OCCURRENCE('occurrence'),
+    FOLLOWING('following'),
+    ALL('all')
+
+    String name
+
+    EventRecurActionType(String name) {
         this.name = name
     }
 }

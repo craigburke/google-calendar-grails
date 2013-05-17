@@ -165,9 +165,160 @@ class EventServiceSpec extends UnitSpec {
 
     }
 
+    def "edit duration of all repeating events"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.updateEvent(event, EventRecurActionType.ALL, occurenceStartTime, occurenceEndTime, null)
+
+        then:
+        result.error == null
+        event.startTime == startTime
+        event.endTime == endTime
+
+        where:
+        occurenceStartTime                                              | occurenceEndTime                                                         || startTime                                                  | endTime
+        mondayNextWeek.withTime(0, 0, 0, 0).toDate()                    | mondayNextWeek.withTime(0, 0, 0, 0).plusHours(2).toDate()                || mondayNextWeek.withTime(0, 0, 0, 0).toDate()               | mondayNextWeek.withTime(0, 0, 0, 0).plusHours(2).toDate()
+        mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()       | mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).plusHours(2).toDate()   || mondayNextWeek.withTime(0, 0, 0, 0).toDate()               | mondayNextWeek.withTime(0, 0, 0, 0).plusHours(2).toDate()
+        wednesdayNextWeek.withTime(3, 30, 0, 0).toDate()                | wednesdayNextWeek.withTime(4, 30, 0, 0).toDate()                         || mondayNextWeek.withTime(3, 30, 0, 0).toDate()              | mondayNextWeek.withTime(4, 30, 0, 0).toDate()
+
+    }
+
+    def "edit individual repeating events"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.updateEvent(event, EventRecurActionType.OCCURRENCE, occurenceStartTime, occurenceEndTime, params)
+
+        then:
+        def newEvent = Event.findByStartTimeAndEndTimeAndTitle(occurenceStartTime, occurenceEndTime, params.title)
+
+        result.error == null
+
+        event.excludeDays.contains(new DateTime(occurenceStartTime).withTime(0, 0, 0, 0).toDate())
+        newEvent != null
+        newEvent.isRecurring == false
+
+        where:
+        occurenceStartTime                                           | occurenceEndTime                                                         | params
+        mondayNextWeek.withTime(0, 0, 0, 0).toDate()                 | mondayNextWeek.withTime(0, 0, 0, 0).plusHours(2).toDate()                | [title: 'FOO']
+        mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()    | mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).plusHours(2).toDate()   | [title: 'BAR']
+    }
+
+    def "edit following repeating events"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.updateEvent(event, EventRecurActionType.FOLLOWING, occurenceStartTime, occurenceEndTime, params)
+
+        then:
+        def followingEvent = Event.findByStartTimeAndEndTimeAndTitle(occurenceStartTime, occurenceEndTime, params.title)
+
+        result.error == null
+        event.recurUntil == new DateTime(occurenceStartTime).withTime(0,0,0,0).toDate()
+        followingEvent != null
+        followingEvent.isRecurring == false
+
+        where:
+        occurenceStartTime                                           | occurenceEndTime                                                         | params
+        mondayNextWeek.withTime(0, 0, 0, 0).toDate()                 | mondayNextWeek.withTime(0, 0, 0, 0).plusHours(2).toDate()                | [title: 'FOO']
+        mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()    | mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).plusHours(2).toDate()   | [title: 'BAR']
+    }
+
+
+    def "delete of all repeating events"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.deleteEvent(event, EventRecurActionType.ALL, occurenceStartTime)
+
+        then:
+        result.error == null
+        Event.get(event.id) == null
+
+        where:
+        occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
+    }
+
+    @IgnoreRest
+    def "delete an individual instance of a repeating event"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.deleteEvent(event, EventRecurActionType.OCCURRENCE, occurenceStartTime)
+
+        then:
+        result.error == null
+        event.excludeDays.contains(new DateTime(occurenceStartTime).withTime(0,0,0,0).toDate())
+
+        where:
+        occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
+    }
 
 
 
+    @IgnoreRest
+    def "delete all following instances of a repeating event"()  {
+        def event = new Event(
+                title: 'Repeating Daily Event',
+                startTime: mondayNextWeek.withTime(0, 0, 0, 0).toDate(),
+                endTime: mondayNextWeek.withTime(0, 0, 0, 0).plusHours(1).toDate(),
+                location: "Regular location",
+                recurInterval: 2,
+                recurType: EventRecurType.DAILY,
+                isRecurring: true
+        ).save(flush: true)
+
+        when:
+        def result = service.deleteEvent(event, EventRecurActionType.OCCURRENCE, occurenceStartTime)
+
+        then:
+        result.error == null
+        event.recurUntil = new DateTime(occurenceStartTime).withTime(0, 0, 0, 0).toDate()
+
+        where:
+        occurenceStartTime << [mondayNextWeek.withTime(0, 0, 0, 0).toDate(),  mondayNextWeek.plusWeeks(1).withTime(0, 0, 0, 0).toDate()]
+    }
 
 
 }
