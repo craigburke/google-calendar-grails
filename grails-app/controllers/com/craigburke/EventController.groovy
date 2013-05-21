@@ -83,8 +83,9 @@ class EventController {
 
 
     def show = {
-        def (occurrenceStart, occurrenceEnd) = [params.long('occurrenceStart'), params.long('occurrenceEnd')]
         def eventInstance = Event.get(params.id)
+        def occurrenceStart = params.long('occurrenceStart') ?: new Instant(eventInstance?.startTime)
+        def occurrenceEnd = params.long('occurrenceEnd') ?: new Instant(eventInstance?.endTime)
 
         if (!eventInstance) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'event.label', default: 'Event'), params.id])}"
@@ -132,7 +133,8 @@ class EventController {
 
     def update = {
         def eventInstance = Event.get(params.id)
-        EventRecurActionType editType = params.editType.toUpperCase() as EventRecurActionType
+
+        EventRecurActionType editType = params.editType ? params.editType.toUpperCase() as EventRecurActionType : null
 
         Date occurrenceStartTime = params.date('startTime', ['MM/dd/yyyy hh:mm a'])
         Date occurrenceEndTime = params.date('endTime', ['MM/dd/yyyy hh:mm a'])
@@ -157,7 +159,7 @@ class EventController {
     def delete = {
         def eventInstance = Event.get(params.id)
 
-        EventRecurActionType deleteType = params.deleteType.toUpperCase() as EventRecurActionType
+        EventRecurActionType deleteType = params.editType ? params.deleteType.toUpperCase() as EventRecurActionType : null
         Date occurrenceStart = new Instant(params.long('occurrenceStart')).toDate()
 
         def result = eventService.deleteEvent(eventInstance, deleteType, occurrenceStart)
