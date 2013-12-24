@@ -59,7 +59,10 @@ class Event {
         if (recurCount && !recurUntil) {
            Date recurCountDate = startTime
 
-           for (int i in 1..(recurCount - 1)) {
+           // extra instance if startTime day is not in recurDaysOfWeek
+           def extraInstance = this.recurType == EventRecurType.WEEKLY && !(eventService.isOnRecurringDay(this, this.startTime)) ? 1 : 0
+
+           for (int i in 1..(recurCount - 1 + extraInstance)) {
                recurCountDate = eventService.findNextOccurrence(this, new DateTime(recurCountDate).plusMinutes(1).toDate())
            }
 
