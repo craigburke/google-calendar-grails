@@ -12,3 +12,4 @@ This is a Grails 2.2.0 project, that serves as a companion to the following blog
 Other related blog posts:
 
 * [Adding tests with Spock](http://www.craigburke.com/blog/2012/08/07/google-calendar-in-grails-adding-tests-with-spock/)
+
