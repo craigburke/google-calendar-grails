@@ -1,5 +1,7 @@
 = Google Calendar in Grails
 
+IMPORTANT: This project isn't currently actively maintained. New updates may follow, but right now it should be used as a reference starting point only.
+
 This is a Grails 2.2.0 project, that serves as a companion to the following blog series Creating Google Calendar in Grails:
 
 * http://www.craigburke.com/blog/2012/02/09/creating-google-calendar-in-grails-part-1-the-model/[Part 1 - The Model]
